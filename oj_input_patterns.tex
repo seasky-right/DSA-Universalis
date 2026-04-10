@@ -1,0 +1,494 @@
+\documentclass[12pt, a4paper]{article}
+
+% ===== 基础宏包 =====
+\usepackage[UTF8]{ctex}          % 中文支持
+\usepackage[
+  top=2.5cm, bottom=2.5cm,
+  left=3cm,  right=3cm
+]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% ===== 代码高亮 =====
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codecomment}{RGB}{100,100,100}
+\definecolor{codekeyword}{RGB}{0,0,180}
+\definecolor{codestring}{RGB}{163,21,21}
+\definecolor{codenumber}{RGB}{128,128,128}
+\definecolor{warningbg}{RGB}{255,248,220}
+\definecolor{warningborder}{RGB}{220,180,0}
+\definecolor{tipbg}{RGB}{235,245,255}
+\definecolor{tipborder}{RGB}{70,130,200}
+
+\lstdefinestyle{cpp}{
+  language=C++,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{codekeyword}\bfseries,
+  commentstyle=\color{codecomment}\itshape,
+  stringstyle=\color{codestring},
+  numberstyle=\tiny\color{codenumber},
+  numbers=left,
+  numbersep=8pt,
+  stepnumber=1,
+  breaklines=true,
+  breakatwhitespace=false,
+  tabsize=4,
+  showspaces=false,
+  showstringspaces=false,
+  frame=single,
+  framesep=4pt,
+  rulecolor=\color{gray!40},
+  xleftmargin=1.5em,
+  framexleftmargin=1.5em,
+  morekeywords={string, stringstream, getline, ios, numeric\_limits, streamsize},
+}
+
+\lstdefinestyle{input}{
+  backgroundcolor=\color{gray!10},
+  basicstyle=\ttfamily\small,
+  frame=single,
+  rulecolor=\color{gray!40},
+  framesep=4pt,
+  numbers=none,
+  breaklines=true,
+  xleftmargin=0.5em,
+  framexleftmargin=0.5em,
+}
+
+% ===== 警告 / 提示框 =====
+\usepackage{tcolorbox}
+\tcbuselibrary{skins, breakable}
+
+\newtcolorbox{warningbox}{
+  enhanced,
+  colback=warningbg,
+  colframe=warningborder,
+  leftrule=4pt, toprule=0.5pt, bottomrule=0.5pt, rightrule=0.5pt,
+  arc=2pt,
+  fonttitle=\bfseries,
+  title={⚠\quad 经典陷阱},
+  breakable,
+}
+
+\newtcolorbox{tipbox}{
+  enhanced,
+  colback=tipbg,
+  colframe=tipborder,
+  leftrule=4pt, toprule=0.5pt, bottomrule=0.5pt, rightrule=0.5pt,
+  arc=2pt,
+  fonttitle=\bfseries,
+  title={💡\quad 通用加速技巧（必加）},
+  breakable,
+}
+
+% ===== 表格 =====
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+
+% ===== 超链接（目录可点击）=====
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  urlcolor=blue!60!black,
+}
+
+% ===== 页眉页脚 =====
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\small OJ 输入模式速查}
+\lhead{\small C++ 算法竞赛}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ===== 章节格式 =====
+\usepackage{titlesec}
+\titleformat{\section}[block]
+  {\large\bfseries}
+  {\thesection}{0.8em}{}
+  [\vspace{-0.3em}\rule{\linewidth}{0.6pt}]
+
+\titleformat{\subsection}[block]
+  {\normalsize\bfseries}
+  {\thesubsection}{0.6em}{}
+
+% ===== 其他 =====
+\usepackage{parskip}
+\setlength{\parskip}{0.5em}
+\usepackage{enumitem}
+\setlist{noitemsep, topsep=4pt}
+
+% ========================================
+\begin{document}
+
+\begin{titlepage}
+  \centering
+  \vspace*{3cm}
+  {\Huge\bfseries OJ 输入模式速查手册}\par
+  \vspace{0.8cm}
+  {\large C++ 算法竞赛 · 国内大学课程 OJ 适用}\par
+  \vspace{0.4cm}
+  {\normalsize 覆盖 PTA、洛谷、牛客、HDU 等主流平台}\par
+  \vspace{2cm}
+  \rule{0.6\linewidth}{0.5pt}\par
+  \vspace{0.4cm}
+  {\small 掌握本文六种模式，可应对 99\% 的 OJ 输入场景}\par
+  \vfill
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% ========================================
+\section{概述}
+
+在算法竞赛与课程 OJ 中，输入处理往往是解题的第一道门槛。
+本文总结了六种最常见的输入模式及其标准解法，并给出了易错点说明。
+
+\textbf{涉及头文件一览：}
+
+\begin{lstlisting}[style=cpp, numbers=none]
+#include <iostream>   // cin, cout, getline
+#include <string>     // string
+#include <sstream>    // stringstream（案例五专用）
+#include <limits>     // numeric_limits（cin.ignore 增强版）
+using namespace std;
+\end{lstlisting}
+
+% ========================================
+\section{案例一：不定数量整数输入（EOF 结束）}
+
+\subsection{特征}
+
+题目说明"输入包含多组数据"或"处理到文件结束"，
+没有给出数据组数，直到读到文件末尾（EOF）为止。
+
+\subsection{输入示例}
+
+\begin{lstlisting}[style=input]
+10 20
+30 40
+...（直到文件结束）
+\end{lstlisting}
+
+\subsection{解决方法}
+
+利用 \texttt{cin >> num} 的返回值——它返回流对象本身；
+当遇到 EOF 或读取失败时，流状态变为 \texttt{false}，\texttt{while} 循环自动结束。
+
+\begin{lstlisting}[style=cpp]
+#include <iostream>
+using namespace std;
+
+int main() {
+    int a, b;
+    // cin >> a >> b 返回流对象，EOF 时转为 false，循环结束
+    while (cin >> a >> b) {
+        // 处理 a 和 b
+    }
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{扩展：} 每行整数数量不固定时，改为：
+
+\begin{lstlisting}[style=cpp]
+int x;
+while (cin >> x) {
+    // 不管每行几个数，全部逐个读入
+}
+\end{lstlisting}
+
+% ========================================
+\section{案例二：指定组数输入}
+
+\subsection{特征}
+
+第一行是整数 $N$，表示接下来有 $N$ 组数据。
+
+\subsection{输入示例}
+
+\begin{lstlisting}[style=input]
+2
+10 20
+30 40
+\end{lstlisting}
+
+\subsection{解决方法}
+
+先读入 $N$，再循环 $N$ 次。
+
+\begin{lstlisting}[style=cpp]
+#include <iostream>
+using namespace std;
+
+int main() {
+    int n;
+    cin >> n;
+    while (n--) {          // 等价于 for (int i = 0; i < n; i++)
+        int a, b;
+        cin >> a >> b;
+        // 处理数据
+    }
+    return 0;
+}
+\end{lstlisting}
+
+% ========================================
+\section{案例三：多组数据 + 每组内含 N 个数}
+
+\subsection{特征}
+
+这是国内课程 OJ（PTA、洛谷入门）中极为高频的嵌套结构：
+第一行为组数 $T$，每组第一行是本组数据量 $N$，
+随后 $N$ 行（或 $N$ 个数）是具体数据。
+
+\subsection{输入示例}
+
+\begin{lstlisting}[style=input]
+2
+3
+1 2 3
+4
+10 20 30 40
+\end{lstlisting}
+
+\subsection{解决方法}
+
+\begin{lstlisting}[style=cpp]
+#include <iostream>
+using namespace std;
+
+int main() {
+    int t;
+    cin >> t;
+    while (t--) {
+        int n;
+        cin >> n;
+        for (int i = 0; i < n; i++) {
+            int x;
+            cin >> x;
+            // 处理第 i 个数据
+        }
+        // 每组处理完毕
+    }
+    return 0;
+}
+\end{lstlisting}
+
+% ========================================
+\section{案例四：带空格的字符串（整行读取）}
+
+\subsection{特征}
+
+输入包含空格，需要把整行作为一个整体读入，
+例如 \texttt{Hello World}、\texttt{I am a student} 等。
+
+\subsection{输入示例}
+
+\begin{lstlisting}[style=input]
+Hello World
+I am a student
+\end{lstlisting}
+
+\subsection{解决方法}
+
+使用 \texttt{getline}。
+
+\begin{lstlisting}[style=cpp]
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+    string s;
+    while (getline(cin, s)) {
+        // 处理整行字符串 s
+    }
+    return 0;
+}
+\end{lstlisting}
+
+\begin{warningbox}
+\textbf{经典陷阱：\texttt{cin} 与 \texttt{getline} 混用}
+
+若题目结构为：第一行整数 $N$，之后 $N$ 行带空格的字符串：
+
+\begin{lstlisting}[style=input]
+2
+Hello World
+I love OJ
+\end{lstlisting}
+
+\texttt{cin >> n} 读取整数后，换行符 \texttt{'\textbackslash n'} 仍残留在缓冲区，
+下一次 \texttt{getline} 会立即读到一个空行。\textbf{必须先吃掉残留换行符}：
+
+\begin{lstlisting}[style=cpp]
+int n;
+cin >> n;
+cin.ignore();   // 吃掉换行符（简洁版，适合大多数情况）
+// 更健壮的写法：
+// cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+string s;
+for (int i = 0; i < n; i++) {
+    getline(cin, s);   // 此时才能正确读取
+}
+\end{lstlisting}
+
+\texttt{numeric\_limits<streamsize>::max()} 需引入头文件 \texttt{<limits>}，
+可忽略缓冲区中任意多个无关字符，比 \texttt{cin.ignore()} 更稳健。
+\end{warningbox}
+
+% ========================================
+\section{案例五：逐行读取数量不定的整数}
+
+\subsection{特征}
+
+每行有若干整数，数量未知，需要逐行处理。
+
+\subsection{输入示例}
+
+\begin{lstlisting}[style=input]
+1 2 3
+4 5
+6 7 8 9
+\end{lstlisting}
+
+\subsection{解决方法}
+
+\texttt{getline} + \texttt{stringstream}（最推荐的标准写法）。
+
+\begin{lstlisting}[style=cpp]
+#include <iostream>
+#include <string>
+#include <sstream>
+using namespace std;
+
+int main() {
+    string line;
+    while (getline(cin, line)) {   // 1. 逐行读取整行
+        stringstream ss(line);     // 2. 将字符串包装为流
+        int num;
+        while (ss >> num) {        // 3. 像用 cin 一样逐个提取
+            // 处理 num
+        }
+        // 到这里，当前行处理完毕，自动进入下一行
+    }
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{原理：} \texttt{stringstream} 将字符串模拟为输入流，
+可以用 \texttt{>>} 运算符从中提取任意类型的数据，
+读完后流状态变为 \texttt{false}，内层 \texttt{while} 自动退出。
+
+% ========================================
+\section{案例六：特定结束标记}
+
+\subsection{特征}
+
+题目说明"当输入为 \texttt{0 0} 时结束"或类似的哨兵值。
+
+\subsection{输入示例}
+
+\begin{lstlisting}[style=input]
+1 2
+10 20
+0 0
+\end{lstlisting}
+
+\subsection{解决方法}
+
+在 \texttt{while} 循环内增加判断条件。
+
+\begin{lstlisting}[style=cpp]
+#include <iostream>
+using namespace std;
+
+int main() {
+    int a, b;
+    while (cin >> a >> b) {
+        if (a == 0 && b == 0) break;   // 遇到哨兵值，跳出
+        // 处理数据
+    }
+    return 0;
+}
+\end{lstlisting}
+
+\textbf{变体：} 结束标记也可能是单个值（如 $-1$）或字符串（如 \texttt{END}），
+原理相同，修改判断条件即可。
+
+% ========================================
+\section{通用加速技巧}
+
+\begin{tipbox}
+在数据量较大时，C++ 的 \texttt{cin}/\texttt{cout} 默认需要与 C 语言的
+\texttt{scanf}/\texttt{printf} 保持同步，速度较慢。
+在算法竞赛中，建议在 \texttt{main} 函数开头加上以下两行（第三行可选）：
+
+\begin{lstlisting}[style=cpp, numbers=none]
+ios::sync_with_stdio(false);   // 关闭 C/C++ I/O 同步，cin 加速
+cin.tie(0);                    // 解除 cin 与 cout 的绑定，避免自动刷新
+// cout.tie(0);                // 几乎无实际效果，可省略
+\end{lstlisting}
+
+\textbf{注意：} 开启加速后，\textbf{禁止混用} \texttt{scanf}/\texttt{printf} 与
+\texttt{cin}/\texttt{cout}，否则输入输出顺序可能错乱。
+\end{tipbox}
+
+% ========================================
+\section{总结对照表}
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{
+  >{\bfseries}l
+  l
+  X
+}
+\toprule
+输入类型 & 核心代码 & 关键点 \\
+\midrule
+EOF 结束
+  & \texttt{while(cin >> a)}
+  & 流状态自动判断，最简洁 \\
+
+指定组数 $N$
+  & \texttt{cin >> n; while(n--)}
+  & 先读 $N$，再循环 \\
+
+嵌套：$T$ 组 + 每组 $N$ 个
+  & 双层循环
+  & 国内 OJ 高频，先读 $T$ 再读 $N$ \\
+
+带空格整行
+  & \texttt{getline(cin, s)}
+  & 与 \texttt{cin} 混用时需 \texttt{cin.ignore()} \\
+
+每行数量不定
+  & \texttt{getline} + \texttt{stringstream}
+  & 需引入 \texttt{<sstream>} \\
+
+特定结束标记
+  & \texttt{while(cin >> a)\{if(...) break;\}}
+  & 循环内判断哨兵值 \\
+\bottomrule
+\end{tabularx}
+\caption{六种 OJ 输入模式速查}
+\end{table}
+
+\vspace{1em}
+\noindent\rule{\linewidth}{0.4pt}
+\begin{center}
+{\small 掌握以上六种模式，可应对国内大学课程 OJ 中 99\% 的输入场景。}
+\end{center}
+
+\end{document}
