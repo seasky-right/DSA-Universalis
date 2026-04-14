@@ -1,64 +1,44 @@
 #include <iostream>
-#include <stack>
+#include <vector>
+#include <fstream>
+#include <algorithm>
 using namespace std;
 
-bool isDigit(int n){
-    return (n >= '0' && n <= '9');
-}
-
-int getPrior(char c){
-    if(c == '+' || c == '-') return 1;
-    else if(c == '*' || c == '/') return 2;
-    else return 0;
-}
-
-int main(){
-    string str;
-    getline(cin, str);
-    stack<char> op;
-    bool isFirst = true;
-    for(size_t i = 0; i < str.size(); ){
-        char c = str[i];
-        if(isDigit(c)){
-            string num;
-            while(isDigit(str[i])){
-                num += str[i++];
-            }
-            if(!isFirst) cout << " ";
-            cout << num;
-            isFirst = false;
-            continue;
-        }else{
-            if(op.empty()){
-                op.push(c);
-                i++;
-                continue;
-            }
-            else if(c == ')'){
-                while(!op.empty() && op.top() != '('){
-                    cout << " " << op.top();
-                    op.pop();
-                }
-                op.pop();
-                i++;
-                continue;
-            }
-            else if(c == '(') {}
-            else{
-                while(!op.empty() && op.top() != '(' && getPrior(c) <= getPrior(op.top())){
-                    cout << " " << op.top();
-                    op.pop();
-                }
-            }
-            op.push(c);
+int main()
+{
+    ifstream ifs;
+    ifs.open("in.txt",ios::in);
+    int n;
+    ifs >> n;
+     vector<vector<int>> v(n,vector<int>(n));
+    int num;
+    for (int i = 0;i <n;i++)
+    {
+        for (int j = 0; j<n;j++)
+        {
+            ifs >> num;
+            v[i][j] = num;
         }
-        ++i;
     }
-
-    while(!op.empty()){
-        cout << " " << op.top();
-        op.pop();
+    for (int i = 0; i <n;i++)
+    {
+        for (int j = i; j < n;j++)
+        {
+            swap(v[i][j],v[j][i]);
+        }
     }
-
+    for (int i = 0; i <n;i++)
+    {
+        reverse(v[i].begin(),v[i].end());
+    }
+    for (int i = 0;i <n;i++)
+    {
+        for (int j = 0;j <n;j++)
+        {
+            cout << v[i][j] << " ";
+        }
+        cout << endl;
+    }
+    ifs.close();
     return 0;
 }
