@@ -1,3 +1,30 @@
+//顺序栈实现
+#include <iostream>
+using namespace std;
+
+const int MaxSize = 1000005;
+char stk[MaxSize];
+int tt = 0;
+
+int main(){
+    string s; cin >> s;
+    for(char c : s){
+        if(c == '#'){
+            if(tt > 0)tt--;
+        }
+        else{
+            stk[--tt] = c;
+        }
+    }
+
+    for(int i = 1; i <= tt; ++i){
+        cout << stk[i];
+    }
+
+    cout << endl;
+    return 0;
+}
+
 /*链栈实现
 #include <iostream>
 #include <string>
@@ -16,12 +43,14 @@ int main(){
 
     Node* top = nullptr;
     for(char c : line){
-        Node* s = new Node(c);
-        if(top != nullptr && c == '#'){
-            Node* temp = top;
-            top = top -> next;
-            delete temp;
+        if(c == '#'){
+            if(top != nullptr){
+                Node* temp = top;
+                top = top -> next;
+                delete temp;
+            }
         }else if(c != '#'){
+            Node* s = new Node(c);
             s -> next = top;
             top = s;
         }
