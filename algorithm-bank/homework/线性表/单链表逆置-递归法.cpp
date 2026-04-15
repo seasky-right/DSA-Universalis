@@ -8,11 +8,11 @@ struct Node {
 };
 
 Node* ReverseList(Node* curr){
-    if(curr == nullptr || curr -> next == nullptr)
-        return curr;
+    if(curr == nullptr || curr -> next == nullptr) return curr;
+    Node* NewHead = ReverseList(curr -> next);
     curr -> next -> next = curr;
     curr -> next = nullptr;
-    return curr;
+    return NewHead;
 }
 
 int main(){
@@ -24,7 +24,7 @@ int main(){
     }
     Node* h = ReverseList(hh -> next);
 
-    Node* p = h -> next;
+    Node* p = h;
     bool isFirst = true;
     while(p != nullptr){
         if(!isFirst) cout << " ";
