@@ -8,37 +8,32 @@ struct Node {
 };
 
 int main() {
-    int n;
-    Node* head = new Node();
-    Node* r = head;
-
-    while (cin >> n && n != -1) {
-        r->next = new Node(n);
-        r = r->next;
+    int n; 
+    Node* head = new Node(), *r = head;
+    while(cin >> n && n != -1){
+        r -> next = new Node(n);
+        r = r -> next;
     }
 
     Node* prev = nullptr;
-    Node* curr = head->next; 
-    Node* nextTemp = nullptr;
+    Node* curr = head -> next;
+    Node* nexttemp = nullptr;
 
-    while (curr != nullptr) {
-        nextTemp = curr->next; 
-        curr->next = prev;     
-        prev = curr;           
-        curr = nextTemp;       
+    while(curr != nullptr){
+        nexttemp = curr -> next;
+        curr -> next = prev;
+        prev = curr;
+        curr = nexttemp;
     }
 
-    head->next = prev;
+    head -> next = prev;
 
-    Node* p = head->next;
-    bool isFirst = true;
-    while (p != nullptr) {
-        if (!isFirst) cout << " ";
-        cout << p->data;
-        isFirst = false;
-        p = p->next;
+    Node* p = head -> next;
+    while(p != nullptr){
+        cout << p -> data << (p -> next ? " " : "");
+        p = p -> next;
     }
+
     cout << endl;
-
     return 0;
 }
