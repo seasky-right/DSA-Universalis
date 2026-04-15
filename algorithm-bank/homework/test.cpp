@@ -2,81 +2,62 @@
 
 using namespace std;
 
-const int MaxSize = 1000005;
-class dequeue{
+class Myqueue{
 public:
-    int data[MaxSize * 2];
-    int front = MaxSize;
-    int rear = MaxSize;
+    int* data;
+    int front;
+    int rear;
+    int capacity;
 
-    void push_front(int x){
-        data[--front] = x;
+    Myqueue(int c){
+        capacity = c;
+        data = new int[c];
+        front = rear = 0;
     }
 
-    void push_back(int x){
-        data[rear++] = x;
+    ~Myqueue(){
+        delete [] data;
     }
 
-    void pop_front(){
+    void push(int x){
+        if((rear+1) % capacity == front) return;
+        rear = (rear+1) % capacity;
+        data[rear] = x;
+    }
+
+    void pop(){
+        if(front == rear) return;
+        front = (front+1) % capacity;
+    }
+
+    void top(){
         if(front == rear){
-            cout << "EMPTY" << endl;
+            cout << -1 << endl;
             return;
         }
-        cout << data[front++] << endl;
-    }
-
-    void pop_back(){
-        if(front == rear){
-            cout << "EMPTY" << endl;
-            return;
-        }
-        cout << data[--rear] << endl;
-    }
-
-    void ftop(){
-        if(front == rear){
-            cout << "EMPTY" << endl;
-            return;
-        }
-        cout << data[front] << endl;
-    }
-
-    void btop(){
-        if(front == rear){
-            cout << "EMPTY" << endl;
-            return;
-        }
-        cout << data[rear - 1] << endl;
+        int head = (front+1) % capacity;
+        cout << data[head] << endl;
     }
 
     void size(){
-        cout << (rear - front) << endl;
+        cout << ((rear + capacity - front) % capacity) << endl;
     }
 
 };
-dequeue deq;
 
 int main(){
-    int m; cin >> m;
-    while(m--){
+    int m, k; 
+    if(!(cin >> m >> k)) return 0;
+    Myqueue que(m);
+    while(k--){
         string op; cin >> op;
-        if(op == "PUSH_FRONT"){
+        if(op == "IN"){
             int x; cin >> x;
-            deq.push_front(x);
-        }else if(op == "PUSH_BACK"){
-            int x; cin >> x;
-            deq.push_back(x);
-        }else if(op == "POP_FRONT")
-            deq.pop_front();
-        else if(op == "POP_BACK")
-            deq.pop_back();
-        else if(op == "FRONT")
-            deq.ftop();
-        else if(op == "BACK")
-            deq.btop();
-        else if(op == "SIZE")
-            deq.size();
+            que.push(x);
+        }else if(op == "OUT") que.pop();
+        else if(op == "GET") que.top();
+        else if(op == "SIZE") que.size();
     }
-
+    cout << endl;
     return 0;
 }
