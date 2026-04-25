@@ -43,4 +43,5 @@
 # macOS metadata
 .DS_Store
 
+# VSCode settings
 .vscode/
