@@ -10,7 +10,7 @@ struct Seqlist{
 };
 
 void insert(Seqlist& l, int x){
-    l.data[++l.size] = x;
+    l.data[l.size++] = x;
 }
 
 void insert(Seqlist& l, int k, int x){
@@ -22,14 +22,21 @@ void insert(Seqlist& l, int k, int x){
 }
 
 void erase(Seqlist& l, int k){
-    for(int i = l.size; i >= k; --i){
+    if (k < 1 || k > l.size) return;
+    for(int i = k; i < l.size; ++i){
         l.data[i - 1] = l.data[i];
     }
     l.size--;
 }
 
-void find(Seqlist& l, int k){
-    cout << l.data[k - 1] << endl;
+void find(Seqlist& l, int x) {
+    for (int i = 0; i < l.size; ++i) {
+        if (l.data[i] == x) {
+            cout << i + 1 << endl;
+            return;
+        }
+    }
+    cout << -1 << endl;
 }
 
 int main(){
@@ -82,9 +89,12 @@ void del(vector<int>& l, int k){
     l.erase(l.begin() + k - 1);
 }
 
-int find(vector<int> l, int k){
-    if(k > l.size()) return -1;
-    return l[k - 1];
+int find(const vector<int>& l, int x) {
+    for (int i = 0; i < l.size(); ++i) {
+        if (l[i] == x)
+            return i + 1;
+    }
+    return -1;
 }
 
 int main(){
