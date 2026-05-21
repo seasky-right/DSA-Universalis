@@ -17,6 +17,11 @@ BTNode* CreateBTree(string str){
     qu.push(s);
 
     while(!qu.empty()){
+        if(qu.front() == nullptr){
+            qu.pop();
+            i += 2; // 一个空节点在下一层占用2个孩子的字符位置，直接跳过它们
+            continue;
+        }
         BTNode* curr = qu.front(); qu.pop();
 
         if(i < str.size() && i < str.size()){
@@ -24,6 +29,8 @@ BTNode* CreateBTree(string str){
                 BTNode* left = new BTNode(str[i]);
                 curr -> lchild = left;
                 qu.push(left);
+            }else{
+                qu.push(nullptr);
             }
         }
         i++;
@@ -33,6 +40,8 @@ BTNode* CreateBTree(string str){
                 BTNode* right = new BTNode(str[i]);
                 curr -> rchild = right;
                 qu.push(right);
+            }else{
+                qu.push(nullptr);
             }
         }
         i++;
