@@ -222,4 +222,257 @@ void backtrack(int level, vector<int>& path, vector<bool>& used){
     }
 }
 
+// 普里姆算法
+int Prim(const int a[][MAXV], int n, int start){
+    vector<int> lowcost(n, INF);
+    vector<int> closest(n, -1);
 
+    for(int i = 0; i < n; ++i){
+        lowcost[i] = a[start][i];
+        closest[i] = start;
+    }
+    lowcost[start] = 0;
+
+    int totalWeight = 0;
+
+    for(int i = 1; i < n; ++i){
+        int mincost = INF;
+        int k = -1;
+
+        for(int j = 0; j < n; ++j){
+            if(lowcost[j] != 0 && lowcost[j] < mincost){
+                mincost = lowcost[j];
+                k = j;
+            }
+        }
+
+        if(k == -1) return -1; //图不连通
+
+        totalWeight += mincost;
+        lowcost[k] = 0; //进入生成树
+
+        for(int j = 0; j < n; ++j){
+            if(lowcost[j] != 0 && a[k][j] < lowcost[j]){
+                lowcost[j] = a[k][j];
+                closest[j] = k;
+            }
+        }
+    }
+
+    return totalWeight;
+}
+
+// 克鲁斯卡尔算法
+struct Edge {
+    int u, v;
+    int weight;
+
+    bool operator<(const Edge& other) const {
+        return weight < other.weight;
+    }
+};
+
+int Find(int parent[], int x) {
+    if(parent[x] == x) return x;
+    return parent[x] = Find(parent, parent[x]);
+}
+int Kruskal(int n, vector<Edge>& edges) {
+    sort(edges.begin(), edges.end());
+
+    vector<int> parent(n);
+    for(int i = 0; i < n; ++i) parent[i] = i;
+
+    int totalWeight = 0;
+    int edgeCount = 0;
+
+    for(const auto& edge : edges) {
+        int rootU = Find(parent.data(), edge.u);
+        int rootV = Find(parent.data(), edge.v);
+
+        if(rootU != rootV) {
+            parent[rootU] = rootV;
+            totalWeight += edge.weight;
+            edgeCount++;
+            if(edgeCount == n - 1) break; // 已经找到n-1条边，生成树完成
+        } else {
+            // 这条边会形成环，跳过
+        }
+    }
+
+    if(edgeCount != n - 1) return -1; // 图不连通
+    return totalWeight;
+}
+
+//迪杰斯特拉算法
+int Dijkstra(const int a[][MAXV], int n, int start, int end) {
+    vector<int> dist(n, INF); // 节点到树的垂直距离
+    vector<int> path(n, -1); // 最短路径树（父表示法）
+    vector<bool> visited(n, false);
+    
+    dist[start] = 0;
+
+    for(int i = 0; i < n; ++i) {
+        int u = -1;
+        int minDist = INF;
+
+        for(int j = 0; j < n; ++j) {
+            if(!visited[j] && dist[j] < minDist) {
+                minDist = dist[j];
+                u = j;
+            }
+        }
+
+        if(u == -1) break; // 所有可达节点都已访问
+
+        visited[u] = true;
+
+        // 松弛
+        for(int v = 0; v < n; ++v) {
+            if(a[u][v] != 0 && a[u][v] != INF && !visited[v]) {
+                if(dist[u] + a[u][v] < dist[v]) {
+                    dist[v] = dist[u] + a[u][v];
+                    path[v] = u;
+                }
+            }
+        }
+    }
+
+    return dist[end] == INF ? -1 : dist[end];
+}
+
+int Floyd(const vector<vector<int>>& graph, int start, int end) {
+    vector<vector<int>> dist = graph;
+    int n = graph.size();
+    vector<vector<int>> path(n, vector<int>(n, -1));
+
+    for(int i = 0; i < n; ++i){
+        for(int j = 0; j < n; ++j){
+            if(i != j && dist[i][j] != 0 && dist[i][j] != INF){
+                path[i][j] = i;
+            }
+        }
+    }
+
+    for(int k = 0; k < n; ++k){
+        for(int i = 0; i < n; ++i){
+            if(dist[i][k] == INF) continue; // 跳过不可达的中间节点
+            for(int j = 0; j < n; ++j){
+                if(dist[k][j] == INF) continue; // 跳过不可达的终点
+                if(dist[i][j] > dist[i][k] + dist[k][j]){
+                    dist[i][j] = dist[i][k] + dist[k][j];
+                    path[i][j] = k;
+                }
+            }
+        }
+    }
+
+    return dist[start][end];
+}
+
+//拓扑排序
+bool TopSort(int n, const vector<vector<int>>& graph) {
+    vector<int> indegree(n, 0);
+    vector<int> topo_order;
+    stack<int> st; // 存储入度为0的节点
+    int count = 0;
+
+    for(int u = 0; u < n; ++u){
+        for(int v : graph[u]){
+            indegree[v]++;
+        }
+    }
+
+    for(int i = 0; i < n; ++i){
+        if(indegree[i] == 0)
+            st.push(i);
+    }
+
+    while(!st.empty()){
+        int u = st.top(); st.pop();
+        topo_order.push_back(u);
+        count++;
+
+        for(int v : graph[u]){
+            indegree[v]--;
+            if(indegree[v] == 0)
+                st.push(v);
+        }
+    }
+
+    if(count == n) return true; // 有向无环图
+    return false; // 存在环
+}
+
+struct Edge {
+    int to;
+    int weight;
+};
+bool CriticalPath(int n, const vector<vector<Edge>>& graph) {
+    vector<int> indegree(n, 0);
+    vector<int> topo_order;
+    stack<int> st;
+
+    for(int u = 0; u < n; ++u){
+        for(const auto& edge : graph[u]){
+            indegree[edge.to]++;
+        }
+    }
+
+    for(int i = 0; i < n; ++i){
+        if(indegree[i] == 0)
+            st.push(i);
+    }
+
+    // ==========================================
+    // 【阶段 1】：顺流而下求 ve 
+    // ==========================================
+    vector<int> ve(n, 0); // ve[i]：事件 i 的最早发生时间
+    while(!st.empty()){
+        int u = st.top(); st.pop();
+        topo_order.push_back(u);
+
+        for(const auto& edge : graph[u]){
+            int v = edge.to;
+            int w = edge.weight;
+            ve[v] = max(ve[v], ve[u] + w); // 更新事件 v 的最早发生时间
+            indegree[v]--;
+            if(indegree[v] == 0)
+                st.push(v);
+        }
+    }
+
+    if(topo_order.size() != n) return false; // 存在环
+
+    // ==========================================
+    // 【阶段 2】：逆流而上求 vl
+    // ==========================================
+    int max_total_time = *max_element(ve.begin(), ve.end()); // 项目总工期
+    vector<int> vl(n, max_total_time); // vl[i]：事件 i 的最晚发生时间，初始值为项目总工期
+
+    for(int i = topo_order.size() - 1; i >= 0; --i){
+        int u = topo_order[i];
+        for(const auto& edge : graph[u]){
+            int v = edge.to;
+            int w = edge.weight;
+            vl[u] = min(vl[u], vl[v] - w); // 更新事件 u 的最晚发生时间
+        }   
+    }
+
+    // ==========================================
+    // 【阶段 3】：找关键活动
+    // ==========================================
+    vector<pair<int, int>> critical_activities; // 存储关键活动 (u, v)
+    for(int u = 0; u < n; ++u){
+        for(const auto& edge : graph[u]){
+            int v = edge.to;   
+            int w = edge.weight;
+            int ee = ve[u]; // 活动 (u, v) 的最早开始
+            int el = vl[v] - w; // 活动 (u, v) 的最晚开始
+            if(ee == el){
+                critical_activities.push_back({u, v});
+            }
+        }
+    }
+
+    return true;
+}
