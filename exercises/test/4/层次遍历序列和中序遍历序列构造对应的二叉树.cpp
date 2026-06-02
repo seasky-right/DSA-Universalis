@@ -11,7 +11,7 @@ struct BTNode{
 };
 
 int findIndex(const vector<char>& InOrder, int il, int ir, char x){
-    for(int i = 0; i < InOrder.size(); ++i){
+    for(int i = il; i <= ir; ++i){
         if(InOrder[i] == x) return i;
     }
     return -1;
@@ -21,28 +21,25 @@ BTNode* CreateBTree(
     const vector<char>& inOrder,
     int inL, int inR
 ){
-    if(inL > inR || levelOrder.empty()) return nullptr;
-
+    if(levelOrder.empty() || inL > inR) return nullptr;
     BTNode* root = new BTNode(levelOrder[0]);
+    if(inL == inR) return root;
 
     int pos = findIndex(inOrder, inL, inR, levelOrder[0]);
+    
+    vector<char> leftlevel, rightlevel;
+    for(size_t i = 1; i < levelOrder.size(); ++i){
+        int idx = findIndex(inOrder, inL, inR, levelOrder[i]);
 
-    vector<char> leftLevel;
-    for(int i = 1; i < levelOrder.size(); ++i){
-        if(findIndex(inOrder, inL, inR, levelOrder[i]) != -1){
-            leftLevel.push_back(levelOrder[i]);
+        if(idx != -1){
+            if(idx < pos) leftlevel.push_back(levelOrder[i]);
+            else rightlevel.push_back(levelOrder[i]);
         }
     }
 
-    vector<char> rightLevel;
-    for(int i = 1; i < levelOrder.size(); ++i){
-        if(findIndex(inOrder, inL, inR, levelOrder[i]) != -1){
-            rightLevel.push_back(levelOrder[i]);
-        }
-    }
+    root -> lchild = CreateBTree(leftlevel, inOrder, inL, pos - 1);
+    root -> rchild = CreateBTree(rightlevel, inOrder, pos + 1, inR);
 
-    root -> lchild = CreateBTree(leftLevel, inOrder, inL, pos - 1);
-    root -> rchild = CreateBTree(rightLevel, inOrder, pos + 1, inR);
     return root;
 }
 
@@ -70,7 +67,7 @@ int main(){
     string in; getline(cin, in);
     istringstream inn(in);
     vector<char> inOrder;
-    for(int i = 0; i < in.size(); ++i){
+    for(int i = 0; i < n; ++i){
         char c; inn >> c;
         inOrder.push_back(c);
     }
