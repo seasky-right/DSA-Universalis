@@ -64,7 +64,7 @@ BTNode* root = CreateBTree(str, i);
 
 ```cpp
 BTNode* CreateBTree(string str) {
-    stack<BTNode*> st;
+    stack<BTNode*> st; // 存储当前处理的父节点
     BTNode* p = nullptr, *root = nullptr;
     bool flag = true;  // true=左, false=右
     int i = 0;
@@ -117,25 +117,27 @@ BTNode* CreateBTree(string str) {
 BTNode* CreateBTreeNLR(
     const vector<char>& pre,   // 前序
     const vector<char>& in,    // 中序
-    int i, int j, int n        // i=前序起点, j=中序起点, n=节点数
+    int& i, int inL, int inR        // &i=前序起点, inL=中序起点, inR=中序终点
 ) {
-    if(n <= 0) return nullptr;
-    char d = pre[i];
-    BTNode* b = new BTNode(d);
+    if(inL > inR) return nullptr;
 
-    int p = j;
-    while(in[p] != d) p++;     // 根在中序中的位置
-    int k = p - j;             // 左子树节点数
+    int d = pre[i++]; // 探针取值后立刻进一步
+    BTNode* root = new node(d);
 
-    b->lchild = CreateBTreeNLR(pre, in, i + 1, j, k);
-    b->rchild = CreateBTreeNLR(pre, in, i + k + 1, p + 1, n - k - 1);
-    return b;
+    int pos = inL;
+    while(in[pos] != d) pos++;
+
+    root->lchild = CreateBTreeNLR(pre, in, i, inL, pos - 1);
+    root->rchild = CreateBTreeNLR(pre, in, i, pos + 1, inR);
+
+    return root;
 }
 ```
 
 **调用**：
 ```cpp
-BTNode* root = CreateBTreeNLR(pre, in, 0, 0, pre.size());
+int i = 0, inL = 0, inR = in.size();
+BTNode* root = CreateBTreeNLR(pre, in, i, inL, inR);
 ```
 
 **原理**：前序第一个是根，在中序中找到根的位置 → 左边全是左子树，右边全是右子树 → 递归。
@@ -155,28 +157,35 @@ BTNode* root = CreateBTreeNLR(pre, in, 0, 0, pre.size());
 BTNode* CreateBTreeLRN(
     const vector<char>& post,  // 后序
     const vector<char>& in,    // 中序
-    int i, int j, int n        // i=后序起点, j=中序起点, n=节点数
+    int& i, int inL, int inR        // &i=后序终点, inL=中序起点, inR=中序终点
 ) {
-    if(n <= 0) return nullptr;
-    char d = post[i + n - 1];  // 后序最后一个才是根！
-    BTNode* b = new BTNode(d);
+    if(inL > inR) return nullptr;
 
-    int p = j;
-    while(in[p] != d) p++;
-    int k = p - j;             // 左子树节点数
+    int d = post[i--]; // 后序从最后一个开始
+    BTNode* root = new BTNode(d);
 
-    b->lchild = CreateBTreeLRN(post, in, i, j, k);
-    b->rchild = CreateBTreeLRN(post, in, i + k, p + 1, n - k - 1);
-    return b;
+    int pos = inL;
+    while(in[pos] != d) pos++;
+
+    // 注意：倒序阅读，必须先右后左！！！
+    root->rchild = CreateBTreeLRN(post, in, i, pos + 1, inR);
+    root->lchild = CreateBTreeLRN(post, in, i, inL, pos - 1);
+
+    return root;
 }
 ```
 
 **调用**：
 ```cpp
-BTNode* root = CreateBTreeLRN(post, in, 0, 0, post.size());
+int i = post.size() - 1, inL = 0, inR = in.size() - 1;
+BTNode* root = CreateBTreeLRN(post, in, i, inL, inR);
 ```
 
-**与前序版本唯一的区别**：根在 `post[i + n - 1]`（当前段最后一个），而不是 `pre[i]`（第一个）。
+**与前序版本的区别**：
+对比维度	前序 + 中序 (Preorder + Inorder)	后序 + 中序 (Postorder + Inorder)	底层物理原因
+探针起点	int idx = 0;	int idx = post.size() - 1;	根节点在序列中的位置（前序在最左，后序在最右）
+探针走向	int root_val = pre[idx++];	int root_val = post[idx--];	剥离根节点后，剩下的数据在哪里（前序在右侧，后序在左侧）
+递归顺序 (最易错点)	先左后右1. root->lchild = ...2. root->rchild = ...	先右后左1. root->rchild = ...2. root->lchild = ...	探针推进一步后，迎面撞上的第一团数据是谁（前序顺着读下一个是左子树，后序逆着读上一个是右子树）
 
 后序分割示意：
 ```
