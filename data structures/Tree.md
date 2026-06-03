@@ -181,12 +181,7 @@ int i = post.size() - 1, inL = 0, inR = in.size() - 1;
 BTNode* root = CreateBTreeLRN(post, in, i, inL, inR);
 ```
 
-**与前序版本的区别**：
-| 对比维度 | 前序 + 中序 (Preorder + Inorder) | 后序 + 中序 (Postorder + Inorder) | 底层物理原因 |
-| ---- | ---- | ---- | ---- |
-| 探针起点 | `int idx = 0;` | `int idx = post.size() - 1;` | 根节点在序列中的位置（前序在最左，后序在最右） |
-| 探针走向 | `int root_val = pre[idx++];` | `int root_val = post[idx--];` | 剥离根节点后，剩下的数据在哪里（前序在右侧，后序在左侧） |
-| 递归顺序 (最易错点) | 先左后右<br>1. `root->lchild = ...`<br>2. `root->rchild = ...` | 先右后左<br>1. `root->rchild = ...`<br>2. `root->lchild = ...` | 探针推进一步后，迎面撞上的第一团数据是谁（前序顺着读下一个是左子树，后序逆着读上一个是右子树） |
+**与前序版本唯一的区别**：根在 `post[i + n - 1]`（当前段最后一个），而不是 `pre[i]`（第一个）。
 
 后序分割示意：
 ```
