@@ -271,4 +271,174 @@ void CreateAVL(AVLNode*& root, const vector<pair<int, string>>& arr) {
 // 5. B+树
 
 // 哈希表
-// 哈哈表
+const int NULLKEY = -1;
+const int DELETED = -1;
+
+struct HNode1 {
+    int key;
+    string data;
+
+    HNode1() : key(NULLKEY), data("") {}
+    HNode1(int k, const string& d) : key(k), data(d) {}
+};
+
+class HashTable1 {
+private:
+    vector<HNode1> table;
+    int size;
+    int p; // 用于除留余数法的质数
+
+public:
+    HashTable1(int n) : size(n), table(n) {
+        // 选择一个小于n的质数作为p
+        p = n - 1;
+        while(p > 1) {
+            bool isPrime = true;
+            for(int i = 2; i <= p / 2; ++i) {
+                if(p % i == 0) {
+                    isPrime = false;
+                    break;
+                }
+            }
+            if(isPrime) break;
+            --p;
+        }
+
+        for(int i = 0; i < size; ++i) {
+            table[i] = HNode1(); // 初始化哈希表
+        }
+    }
+
+    int Search(int k) {
+        int d = k % p;
+
+        while(table[d].key != NULLKEY) {
+            if(table[d].key == k) {
+                return d; // 找到键，返回索引
+            }
+            d = (d + 1) % size; // 线性探测下一个位置
+        }
+
+        /*平方探测法实现
+        int start_d = d; // 记录初始位置以避免死循环
+        int i = 1;
+
+        while(table[d].key != NULLKEY) {
+            if(table[d].key == k) return d;
+            if(i * i >= size) break; // 探测次数超过表大小，停止探测
+
+            int k_val = (i + 1) / 2; // 计算平方探测的偏移量
+            int offset = k_val * k_val;
+
+            if(i % 2 == 1) {
+                d = (start_d + offset) % size; // 奇数次探测向右
+            } else {
+                d = (start_d - (offset % size) + size) % size; // 偶数次探测向左
+            }
+            i++;
+        }*/
+
+        return -1;
+    }
+
+    bool Insert(int k, const string& v) {
+        if(Search(k) != -1) return false; // 键已存在
+
+        int d = k % p;
+        while(table[d].key != NULLKEY && table[d].key != DELETED) {
+            d = (d + 1) % size; // 线性探测下一个位置
+        }
+        table[d] = HNode1(k, v); // 插入新节点
+        return true;
+    }
+
+    bool Delete(int k) {
+        int d = Search(k);
+        if(d == -1) return false;
+
+        table[d].key = DELETED;
+        table[d].data = "";
+        return true;
+    }
+};
+
+struct HNode2 {
+    int key;
+    string data;
+    HNode2* next;
+
+    HNode2() : key(NULLKEY), data(""), next(nullptr) {}
+    HNode2(int k, const string& d) : key(k), data(d), next(nullptr) {}
+};
+
+class HashTable2 {
+private:
+    vector<HNode2*> table;
+    int size;
+    int p;
+
+public:
+    HashTable2(int n, int prime) : size(n), p(prime), table(n, nullptr) {}
+
+    ~HashTable2() {
+        for(int i = 0; i < size; ++i) {
+            HNode2* curr = table[i];
+            while(curr) {
+                HNode2* nxt = curr -> next;
+                delete curr;
+                curr = nxt;
+            }
+        }
+    }
+
+    HNode2* Search(int k) {
+        int d = k % p;
+        HNode2* curr = table[d];
+
+        while(curr) {
+            if(curr -> key == k) {
+                return curr;
+            }
+            curr = curr -> next;
+        }
+
+        return nullptr;
+    }
+
+    bool Insert(int k, const string& v) {
+        if(Search(k)) return false;
+
+        int d = k % p;
+        HNode2* newNode = new HNode2(k, v);
+        newNode -> next = table[d];
+        table[d] = newNode;
+        return true;
+    }
+
+    bool Delete(int k) {
+        int d = k % p;
+        HNode2* curr = table[d];
+        if(!curr) return false;
+        
+        if(curr -> key == k) {
+            table[d] = curr -> next;
+            delete curr;
+            return true;
+        }
+
+        HNode2* prev = curr;
+        curr = curr -> next;
+
+        while(curr) {
+            if(curr -> key == k) {
+                prev -> next = curr -> next;
+                delete curr;
+                return true;
+            }
+            prev = curr;
+            curr = curr -> next;
+        }
+
+        return false;
+    }
+};

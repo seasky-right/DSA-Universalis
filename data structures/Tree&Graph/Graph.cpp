@@ -340,6 +340,7 @@ int Dijkstra(const int a[][MAXV], int n, int start, int end) {
     return dist[end] == INF ? -1 : dist[end];
 }
 
+// 弗洛伊德算法
 int Floyd(const vector<vector<int>>& graph, int start, int end) {
     vector<vector<int>> dist = graph;
     int n = graph.size();
