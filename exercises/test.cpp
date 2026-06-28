@@ -1,92 +1,71 @@
 #include <iostream>
+#include <fstream>
+#include <vector>
 #include <string>
 #include <algorithm>
 using namespace std;
 
-struct node {
-    int data;
-    node* lchild, *rchild;
+class Solution {
+public:
+    string largestNumber(vector<int>& nums) {
+        vector<string> s;
 
-    node(int d) : data(d), lchild(nullptr), rchild(nullptr) {}
+        for (int i = 0; i < nums.size(); i++) {
+            s.push_back(to_string(nums[i]));
+        }
+
+        sort(s.begin(), s.end(), [](const string& a, const string& b) {
+            return a + b > b + a;
+        });
+
+        if (s.size() > 0 && s[0] == "0") {
+            return "0";
+        }
+
+        string ans = "";
+        for (int i = 0; i < s.size(); i++) {
+            ans += s[i];
+        }
+
+        return ans;
+    }
 };
 
-node* nodes[10005] = {nullptr};
-node* CreateTree(int n) {
-    string pr, lr, rr; 
-    if(!(cin >> pr >> lr >> rr))
-        return nullptr;
-    int roo = stoi(pr);
-    nodes[roo] = new node(roo);
-    node* root = nodes[roo];
-
-    if(lr == "#") root -> lchild = nullptr;
-    else {
-        int l = stoi(lr);
-        nodes[l] = new node(l);
-        root -> lchild = nodes[l];
-    }
-    if(rr == "#") root -> rchild = nullptr;
-    else {
-        int r = stoi(rr);
-        nodes[r] = new node(r);
-        root -> rchild = nodes[r];
-    }
-
-    for(int i = 1; i < n; ++i) {
-        string pc, lc, rc; cin >> pc >> lc >> rc;
-
-        int p = stoi(pc);
-        if(!nodes[p]) nodes[p] = new node(p);
-
-        if(lc == "#") nodes[p] -> lchild = nullptr;
-        else {
-            int l = stoi(lc);
-            if(!nodes[l]) nodes[l] = new node(l);
-            nodes[p] -> lchild = nodes[l];
-        }
-
-        if(rc == "#") nodes[p] -> rchild = nullptr;
-        else {
-            int r = stoi(rc);
-            if(!nodes[r]) nodes[r] = new node(r);
-            nodes[p] -> rchild = nodes[r];
-        }
-    }
-
-    return root;
-}
-
-int best = 0;
-bool bestSet = false;
-int findLongest(node* root) {
-    if(!root) return 0;
-    int left = findLongest(root -> lchild);
-    int right = findLongest(root -> rchild);
-
-    if (root->lchild && root->rchild) {
-        int cand = left + right + 1;
-        if (!bestSet || cand > best) {
-            best = cand;
-            bestSet = true;
-        }
-        return max(left, right) + 1;
-    } else {
-        return max(left, right) + 1;
-    }
-}
-
 int main() {
-    int n; cin >> n;
-    node* root = CreateTree(n);
+    ifstream fin("in.txt");
 
-    if(!root) {
-        cout << 0 << endl;
+    if (!fin.is_open()) {
         return 0;
-    
     }
-    int rootDown = findLongest(root);
-    if (!bestSet) best = rootDown;
-    cout << best << endl;
+
+    string line;
+    getline(fin, line);
+
+    vector<int> nums;
+    int num = 0;
+    bool hasNum = false;
+
+    for (int i = 0; i < line.length(); i++) {
+        if (line[i] >= '0' && line[i] <= '9') {
+            num = num * 10 + (line[i] - '0');
+            hasNum = true;
+        } else if (line[i] == ',') {
+            if (hasNum) {
+                nums.push_back(num);
+                num = 0;
+                hasNum = false;
+            }
+        }
+    }
+
+    if (hasNum) {
+        nums.push_back(num);
+    }
+
+    Solution sol;
+    cout << sol.largestNumber(nums) << endl;
+
+    fin.close();
 
     return 0;
 }

@@ -21,30 +21,31 @@ node* CreateTree(istringstream& iss) {
     return root;
 }
 
-node* FindLCA(node* root, int p, int q) {
-    if(!root) return nullptr;
+node* head = nullptr;
+node* tail = nullptr;
+void convert(node* root, node*& pre) {
+    if(!root) return;
+    convert(root -> lchild, pre);
 
-    if(root -> data > p && root -> data > q) 
-        return FindLCA(root -> lchild, p, q);
+    if(pre == nullptr) head = root;
+    root -> lchild = pre;
+    if(pre) pre -> rchild = root;
+    tail = root;
 
-    if(root -> data < p && root -> data < q) 
-        return FindLCA(root -> rchild, p, q);
-
-    return root;
+    pre = root;
+    convert(root -> rchild, pre);
 }
 
 int main() {
-    int p, q; cin >> p >> q;
-    cin.ignore();
     string line;
     getline(cin, line);
     istringstream iss(line);
 
     node* root = CreateTree(iss);
 
-    node* s = FindLCA(root, p, q);
+    node* pre = nullptr;
+    convert(root, pre);
 
-    cout << s -> data << endl;
+    cout << head -> data << " " << tail -> data << endl;
     return 0;
 }
-
