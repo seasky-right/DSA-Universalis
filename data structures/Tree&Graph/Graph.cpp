@@ -404,6 +404,7 @@ bool TopSort(int n, const vector<vector<int>>& graph) {
     return false; // 存在环
 }
 
+// 关键路径
 struct Edge {
     int to;
     int weight;
@@ -477,3 +478,10 @@ bool CriticalPath(int n, const vector<vector<Edge>>& graph) {
 
     return true;
 }
+/*
+ve：从前往后取 max
+vl：从后往前取 min
+e：边起点的 ve
+l：边终点的 vl - 边权
+e == l：关键活动
+*/
