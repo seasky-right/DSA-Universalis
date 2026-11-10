@@ -244,6 +244,7 @@ int Prim(int n) {
         }
 
         if(u == -1) break; // 所有可达节点都已访问
+        if(dist[u] == INF) return -1;
         visited[u] = true;
         ans += dist[u];
 
@@ -302,13 +303,14 @@ void Dijkstra(int n, int s) {
 
     for(int i = 1; i <= n; ++i) {
         int u = -1;
-        for(int j = 1; j < n; ++j) {
+        for(int j = 1; j <= n; ++j) {
             if(!visited[j] && (u == -1 || dist[j] < dist[u])) {
                 u = j;
             }
         }
 
         if(u == -1) break;
+        if(dist[u] == INF) break;
         visited[u] = true;
 
         for(auto e : adj[u]) {
