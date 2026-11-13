@@ -6,33 +6,21 @@
 
 using namespace std;
 
-int main() {
-    vector<int> g, s;
-
-    string gs, ss;
-    getline(cin, gs);
-    istringstream igs(gs);
-    for(size_t i = 0; i < gs.size(); i++) {
-        int x; igs >> x; g.push_back(x);
-    }
-       
-    getline(cin, ss);
-    istringstream iss(ss);
-    for(size_t i = 0; i < gs.size(); i++) {
-        int x; iss >> x; s.push_back(x); 
-    }
-
-    sort(g.begin(), g.end());
+class Solution {
+public:
+    int findContentChildren(vector<int>& g, vector<int>& s) {
+        sort(g.begin(), g.end());
     sort(s.begin(), s.end());
 
-    int ans = 0, k = 0;
-    for(size_t i = 0; i < g.size(); i++) {
-        for(size_t j = k; j < s.size(); ++j) {
-            if(s[j] >= g[i])
-                ans++; k = j;
+    int ans = 0, i = 0, j = 0;
+    while (i < g.size() && j < s.size()) {
+            if (s[j] >= g[i]) {
+                ans++;
+                i++;
+            }
+            j++;
         }
-    }
 
-    cout << ans << '\n';
-    return 0;
-}
+        return ans;
+    }
+};
